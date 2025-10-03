@@ -1,1 +1,1 @@
-- Initia project 
+- Initial project 
