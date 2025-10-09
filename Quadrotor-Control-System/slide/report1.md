@@ -8,10 +8,7 @@ math: katex
 ---
 
 
-# Minimum‑snap QP cho flat outputs (x<sub>q</sub>, z<sub>q</sub>, β)
-
-Theo *Thomas et al., IDETC 2013*. Hệ phẳng với flat outputs:  
-$y = [\,x_q,\; z_q,\; \beta\,]^\top$.  
+# Minimum‑snap Quadratic Programming
 
 ---
 

@@ -80,7 +80,7 @@ def jax_dynamics_matrix(state, control, dt=dt):
     # Chuyển sang numpy để giải tuyến tính 4×4
     D_np = np.array(D)
     rhs_np = np.array(rhs)
-    qddot_np = np.linalg.solve(D_np, rhs_np)
+    qddot_np = np.linalg.solve(D_np, rhs_np) # giai phương tuyến tính Ax = b => x = A^{-1}b , x la qddot
     # Chuyển trở lại jax
     qddot = jnp.array(qddot_np, dtype=state.dtype)
 
@@ -94,34 +94,34 @@ def jax_dynamics_matrix(state, control, dt=dt):
     ], dtype=state.dtype)
 
     return state + state_dot * dt
-@jax.jit
-def jax_dynamics(state, control, dt=dt):
-    y, y_dot, z, z_dot, phi, phi_dot, theta, theta_dot = state
-    u1, u2, u3 = control
+# @jax.jit
+# def jax_dynamics(state, control, dt=dt):
+#     y, y_dot, z, z_dot, phi, phi_dot, theta, theta_dot = state
+#     u1, u2, u3 = control
 
-    M = m_q + m_p
+#     M = m_q + m_p
 
-    # Coupled translational accelerations (giữ như trước)
-    y_ddot = (m_q + m_p*jnp.cos(theta)**2) / (m_q*M) * u1 * jnp.sin(phi) \
-             + (m_p*jnp.cos(theta)*jnp.sin(theta)) / (m_q*M) * u1 * jnp.cos(phi) \
-             + (m_p*l_p*(theta_dot**2)*jnp.sin(theta)) / M
+#     # Coupled translational accelerations (giữ như trước)
+#     y_ddot = (m_q + m_p*jnp.cos(theta)**2) / (m_q*M) * u1 * jnp.sin(phi) \
+#              + (m_p*jnp.cos(theta)*jnp.sin(theta)) / (m_q*M) * u1 * jnp.cos(phi) \
+#              + (m_p*l_p*(theta_dot**2)*jnp.sin(theta)) / M
 
-    z_ddot = -g + (m_q + m_p*jnp.sin(theta)**2) / (m_q*M) * u1 * jnp.cos(phi) \
-             + (m_p*jnp.cos(theta)*jnp.sin(theta)) / (m_q*M) * u1 * jnp.sin(phi) \
-             + (m_p*l_p*(theta_dot**2)*jnp.cos(theta)) / M
+#     z_ddot = -g + (m_q + m_p*jnp.sin(theta)**2) / (m_q*M) * u1 * jnp.cos(phi) \
+#              + (m_p*jnp.cos(theta)*jnp.sin(theta)) / (m_q*M) * u1 * jnp.sin(phi) \
+#              + (m_p*l_p*(theta_dot**2)*jnp.cos(theta)) / M
 
-    # Attitude & pendulum with actuated joint:
-    # - u2 là torque lên thân do rotor
-    # - u3 là torque tác dụng lên pendulum; phản lực lên thân là -u3
-    phi_ddot   = (u2 - u3) / I_xx
-    theta_ddot = -jnp.cos(theta) / (m_q*l_p) * u1 * jnp.sin(phi) \
-                 - jnp.sin(theta) / (m_q*l_p) * u1 * jnp.cos(phi) \
-                 + (u3 / I_p)
+#     # Attitude & pendulum with actuated joint:
+#     # - u2 là torque lên thân do rotor
+#     # - u3 là torque tác dụng lên pendulum; phản lực lên thân là -u3
+#     phi_ddot   = (u2 - u3) / I_xx
+#     theta_ddot = -jnp.cos(theta) / (m_q*l_p) * u1 * jnp.sin(phi) \
+#                  - jnp.sin(theta) / (m_q*l_p) * u1 * jnp.cos(phi) \
+#                  + (u3 / I_p)
 
-    next_state = state + jnp.array([
-        y_dot, y_ddot, z_dot, z_ddot, phi_dot, phi_ddot, theta_dot, theta_ddot
-    ]) * dt
-    return next_state
+#     next_state = state + jnp.array([
+#         y_dot, y_ddot, z_dot, z_ddot, phi_dot, phi_ddot, theta_dot, theta_ddot
+#     ]) * dt
+#     return next_state
 
 # =============================
 # PID controller

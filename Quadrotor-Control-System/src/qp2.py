@@ -10,20 +10,19 @@ from dataclasses import dataclass
 # Times
 t_pick = 2.0
 t_final = 3.5
-
 # Waypoints (approximate Fig. 5)
 x0, z0         = -2.0,  2.0
 x_pick, z_pick =  0.50, 1.35
 xF, zF         =  1.55, 1.55
 
 # Beta boundary & shaping
-beta0_deg      = 22.0           # beta at t=0
+beta0_deg      = 25.0           # beta at t=0
 beta_pick_deg  = 90.0           # vertical at pickup
 betaF_deg      = 90.0           # settle near 90 at the end
 beta_min_deg   = 5.0            # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  non-negativity lower bound in degrees
 
 # "Point-at-target" (pre-pick) and post-pick shaping weights
-rho_pre   = 2e6   # strength for LOS before pickup
+rho_pre   = 2e6  # strength for LOS before pickup
 rho_post  = 1e7   # strength for shaping after pickup
 rho_hinge = 1e8   # strength for hinge (β >= beta_min)
 
@@ -41,18 +40,18 @@ Lg = 0.105
 def poly_deriv_coeff(k, r):
     if k < r: return 0.0
     c=1.0
-    for i in range(r): c *= (k-i)
+    for i in range(r): c *= (k-i) # k(k-1)(k-2)...(k-r+1) = k!/(k-r)!
     return c
 
 def basis_row(t, degree, r):
     row = np.zeros(degree+1)
     for k in range(degree+1):
         coeff = poly_deriv_coeff(k, r)
-        row[k] = 0.0 if coeff == 0.0 else coeff * (t**(k-r))
+        row[k] = 0.0 if coeff == 0.0 else coeff * (t**(k-r)) # k!/(k-r)! * t^(k-r)
     return row
 
 def segment_cost_Q(degree, T, snap_order=4):
-    n=degree; Q=np.zeros((n+1,n+1))
+    n=degree; Q=np.zeros((n+1,n+1)) # n = 7, snap_order=4, T la thoi gian cua doan
     for i in range(snap_order, n+1):
         for j in range(snap_order, n+1):
             ci=cj=1.0
@@ -60,7 +59,7 @@ def segment_cost_Q(degree, T, snap_order=4):
             for b in range(snap_order): cj *= (j-b)
             power = i + j - 2*snap_order + 1
             Q[i, j] = ci * cj * (T**power) / power
-    return Q
+    return Q # tra ve ma tran chi phi Q dang cj*cj * int_0^T (d^snap_order p(t)/dt^snap_order)^2 dt
 
 @dataclass
 class Segment:
@@ -87,7 +86,7 @@ def build_eq_qp_1d(spec: TrajectorySpec1D, snap_order=4, continuity_order=3):
     """
     segs  = spec.segments
     n     = segs[0].degree
-    assert len(segs) == 2, "This helper expects exactly 2 segments"
+    assert len(segs) == 2, "This helper expects exactly 2 segments" # mo ta 2 doan
     N     = (n+1)*2
     # Hessian for snap
     H = np.zeros((N, N))

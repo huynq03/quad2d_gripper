@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 
 # ==== Parameters ====
 dt, T = 0.02, 10.0
-m_q, m_g, g = 0.6, 0.15, 9.81
+m_q, m_g, g = 0.5, 0.158, 9.81
 I_xx, l_p, l_q = 0.15, 0.35, 0.2
 J_q, J_g, L_g = 0.15, 0.0, 0.35
 # u1: Tổng lực nâng (thrust) tác động lên hệ (từ quadrotor), điều khiển chuyển động lên/xuống (z).
@@ -39,7 +39,7 @@ def jax_dynamics_matrix(state, control, dt=dt):
     F = jnp.array([u1*jnp.sin(phi), u1*jnp.cos(phi), u2-tau, tau], dtype=state.dtype)
     qdot = jnp.array([y_dot, z_dot, phi_dot, beta_dot], dtype=state.dtype)
     rhs = F - C @ qdot - G
-    qddot = jnp.array(np.linalg.solve(np.array(D), np.array(rhs)), dtype=state.dtype)
+    qddot = jnp.array(np.linalg.solve(np.array(D), np.array(rhs)), dtype=state.dtype) # D @ qddot = rhs => qddot = D^-1 @ rhs
     y_ddot, z_ddot, phi_ddot, beta_ddot = qddot
     state_dot = jnp.array([y_dot, y_ddot, z_dot, z_ddot, phi_dot, phi_ddot, beta_dot, beta_ddot], dtype=state.dtype)
     return state + state_dot * dt
@@ -52,12 +52,12 @@ class PID:
         self.out_min, self.out_max = out_min, out_max
     def __call__(self, ref, meas, dt):
         e = ref - meas
-        self.i_term += e * dt
-        d = (e - self.prev_e) / dt if dt > 1e-6 else 0.0
-        self.prev_e = e
+        self.i_term += e * dt  # tich phan e*dt
+        d = (e - self.prev_e) / dt if dt > 1e-6 else 0.0 # dao ham de/dt
+        self.prev_e = e # luu e hien tai
         u = self.Kp*e + self.Ki*self.i_term + self.Kd*d
         if self.out_min is not None and self.out_max is not None:
-            u = np.clip(u, self.out_min, self.out_max)
+            u = np.clip(u, self.out_min, self.out_max)  # gioi han u
         return float(u)
 
 # ==== Controller ====
@@ -71,22 +71,24 @@ class CascadePIDActuatedPendulum:
         self.t = 0.0
     def step(self, state):
         y, ydot, z, zdot, phi, phidot, theta, thetad = state
-        az_cmd = self.pid_z(self.z_ref, z, dt)
+        az_cmd = self.pid_z(self.z_ref, z, dt) # z_ref la vi tri mong muon cua z
         u1 = (m_q + m_g) * (g + az_cmd)
         u1 = np.clip(u1, U1_MIN, U1_MAX)
         phi_ref = self.pid_y(self.y_ref, y, dt)
         u2 = self.pid_phi(phi_ref, phi, dt)
-        u3 = self.pid_theta(0.2, theta, dt) + np.sin(self.t)
+        u3 = self.pid_theta(0.2, theta, dt) + np.sin(self.t)*0.5
+        u3 = np.clip(u3, U3_MIN, U3_MAX)
         self.t += dt
         return u1, u2, u3
 
 # ==== Simulation ====
 def simulate(controller, T=T, dt=dt):
     N = int(T/dt)
-    state = np.array([0.0, 0.0, 0.5, 0.0, 0.0, 0.0, np.deg2rad(30.0), 0.0])
+    state = np.array([0.0, 0.0, 0.5, 0.0, 0.0, 0.0, np.deg2rad(-30.0), 0.0]) 
+    # y, y_dot, z, z_dot, phi, phi_dot, beta, beta_dot
     states, controls = [state], []
     for _ in range(N):
-        u1, u2, u3 = controller.step(state)
+        u1, u2, u3 = controller.step(state) # cap nhat dieu khien theo trang thai hien tai
         u = jnp.array([u1, u2, u3], dtype=jnp.float32)
         state = np.array(jax_dynamics_matrix(state, u))
         states.append(state)
