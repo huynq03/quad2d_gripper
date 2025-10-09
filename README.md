@@ -3,3 +3,4 @@
   - https://github.com/arjune123/Quadrotor-Control-System
   - https://github.com/shaoanlu/mppi_cbf
   - https://hybrid-robotics.berkeley.edu/publications/IDETC2013.pdf
+  - [ICRA.2011.5980409.pdf](https://github.com/user-attachments/files/22789722/ICRA.2011.5980409.pdf)
