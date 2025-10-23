@@ -3,7 +3,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import sys
-
 MASS = 0.600
 INERTIA = 0.15
 LENGTH = 0.2
