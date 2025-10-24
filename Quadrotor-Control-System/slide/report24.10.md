@@ -14,6 +14,18 @@ math: true
 **Date:** 24/10/2025
 
 
+---
+## Accomplishments
+
+- **Completed Tasks:**  
+    - Mô phỏng quadrotor bay từ A tới B 
+    - Xây dựng QP
+---
+
+## Tasks in Progress
+
+- Tìm hiểu kĩ hơn về QP
+- Sửa lại mô phỏng quad, cấu trúc code 
 
 ---
 
@@ -46,6 +58,7 @@ math: true
 ---
 
 # Convex Optimization
+- Source : [Visually Explained](https://youtu.be/uh1Dk68cfWs?si=DU9xcbKCmsRUOxf0)
 
 ---
 
@@ -77,13 +90,13 @@ Tối ưu hóa là quá trình **tìm kiếm phương án tốt nhất** nhằm 
 **Bài toán CÓ ràng buộc**
 * `min f(x)` *sao cho* $g(x) \le 0$.
 * *Vấn đề:* Phải "kiểm tra" ranh giới, không thể đi tự do.
-* *Giải pháp:* Cần các phương pháp tinh vi hơn (Hàm phạt, KKT).
+* *Giải pháp:* Hàm phạt, KKT
 
 ---
 
 ## From Constraint to Penalty Function
 
-**Ý tưởng:** Thay "hàng rào cứng" (ràng buộc) bằng "án phạt" (penalty).
+**Ý tưởng:** Thay ràng buộc bằng penalty 
 
 **Hàm mục tiêu mới = $f(x) + P(x)$**
 
@@ -94,14 +107,13 @@ $\implies$ Thuật toán sẽ *tự động* tránh vùng vi phạm.
 
 ---
 
-## Drawbacks of Simple Penalties
+## Cons
 
 1.  **Hàm phạt 0/Vô cùng:** * **Không liên tục (discontinuous)**.
     * Không thể lấy Gradient $\implies$ thuật toán hỏng.
 2.  **Hàm phạt Tuyến tính $u \cdot g(x)$:**
-    * **Liên tục** (Tốt!)
+    * **Liên tục** 
     * *Nhược điểm:* Kết quả tối ưu bị **phụ thuộc vào độ dốc $u$**.
-    * Vô tình tạo "phần thưởng" (reward) khi $g(x) < 0$.
 
 ---
 
@@ -123,18 +135,11 @@ $\implies$ Thuật toán sẽ *tự động* tránh vùng vi phạm.
 
 ---
 
-## Dual Definition of Convex Functions
-
-> Một hàm là lồi **khi và chỉ khi** đồ thị của nó luôn nằm **PHÍA TRÊN** mọi siêu phẳng tiếp tuyến (tangent) của nó.
-
----
-
 ## Consequence of the Tangent Definition
 
 Vì hàm lồi luôn nằm *trên* tiếp tuyến:
 
-* Nếu ta tìm được điểm $x^*$ mà tiếp tuyến **nằm ngang** (tức là $\nabla f(x^*) = 0$)...
-* ...thì $x^*$ **chắc chắn** là cực tiểu toàn cục.
+* Nếu ta tìm được điểm $x^*$ mà tiếp tuyến **nằm ngang** (tức là $\nabla f(x^*) = 0$) thì $x^*$ **chắc chắn** là cực tiểu toàn cục.
 
 **Kết luận:** Với hàm lồi, $\min f(x)$ $\implies$ giải $\nabla f(x) = 0$.
 
@@ -178,7 +183,7 @@ Kết hợp mục tiêu và ràng buộc thành **Hàm Lagrangian $\mathcal{L}(x
 **$\mathcal{L}(x, u) = f(x) + u \cdot g(x)$**
 
 * $f(x)$: Chi phí gốc.
-* $u$: Hệ số Lagrange ("giá" của vi phạm).
+* $u$: Hệ số Lagrange 
 * $g(x)$: Ràng buộc.
 
 KKT mô tả "điểm cân bằng" (saddle point) của hàm $\mathcal{L}$.

@@ -7,7 +7,7 @@ from matplotlib.animation import FuncAnimation
 # ==== Parameters ====
 dt, T = 0.02, 10.0
 # Bạn có thể thay đổi m_g ở đây, ví dụ:
-m_q, m_g, g = 0.5, 0.05, 9.81  # Giảm m_g như bạn đã thử
+m_q, m_g, g = 0.5, 0.158, 9.81  # Giảm m_g như bạn đã thử
 I_xx, l_p, l_q = 0.15, 0.35, 0.2
 J_q, J_g, L_g = 0.15, 0.0, 0.35
 

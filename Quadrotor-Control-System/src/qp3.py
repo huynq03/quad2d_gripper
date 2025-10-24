@@ -300,3 +300,18 @@ ax2.grid(True, alpha=0.5)
 # Hiển thị figure chung
 fig.tight_layout()
 plt.show()
+
+# ==============================
+# LƯU KẾT QUẢ QP ĐỂ DÙNG CHO BƯỚC CHUYỂN ĐỔI u1, u3, tau
+# ==============================
+import pandas as pd
+flat_out_path = "/home/huynq/Project20251/Quadrotor-Control-System/src/minsnap_results/flat_outputs.csv"
+
+df_flat = pd.DataFrame({
+    "t": t,
+    "x_q": x,      # từ evaluate_piecewise(cx, ...)
+    "z_q": z,      # từ evaluate_piecewise(cz, ...)
+    "beta": beta   # (radian) từ evaluate_piecewise(cb, ...)
+})
+df_flat.to_csv(flat_out_path, index=False)
+print(f"Saved flat outputs (t, x_q, z_q, beta) -> {flat_out_path}")
