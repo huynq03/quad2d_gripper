@@ -71,6 +71,8 @@ def recover_inputs_from_flat(
     u1 = (m_s * np.linalg.norm(v, axis=-1)).astype(float)
     b3 = _normalize(v)
 
+    theta = np.arctan2(b3[:, 0], b3[:, 2])
+    
     # b2 = e2; b1 = b2 × b3
     b2 = np.array([0.0, 1.0, 0.0])
     b1 = np.cross(b2.reshape(1, 3), b3)
@@ -95,6 +97,7 @@ def recover_inputs_from_flat(
         "u1": u1,
         "u3": u3,
         "tau": tau,
+        "theta": theta,
         "theta_dot": theta_dot,
         "theta_ddot": theta_ddot,
         "x_g": x_g,
@@ -125,10 +128,11 @@ if __name__ == "__main__":
         "u1": res["u1"],
         "u3": res["u3"],
         "tau": res["tau"],
+        "theta": res["theta"], 
         "theta_dot": res["theta_dot"],
         "theta_ddot": res["theta_ddot"],
         "x_g": res["x_g"],
         "z_g": res["z_g"],
     })
     out_df.to_csv(out_csv, index=False)
-    print(f"[OK] Đã lưu u1/u3/tau -> {out_csv}")
+    print(f"[OK] Đã lưu u1/u3/tau/theta -> {out_csv}")  

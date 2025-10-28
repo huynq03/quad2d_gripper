@@ -306,12 +306,14 @@ plt.show()
 # ==============================
 import pandas as pd
 flat_out_path = "/home/huynq/Project20251/Quadrotor-Control-System/src/minsnap_results/flat_outputs.csv"
-
 df_flat = pd.DataFrame({
     "t": t,
-    "x_q": x,      # từ evaluate_piecewise(cx, ...)
-    "z_q": z,      # từ evaluate_piecewise(cz, ...)
-    "beta": beta   # (radian) từ evaluate_piecewise(cb, ...)
+    "x_q": x,         # vị trí x
+    "z_q": z,         # vị trí z
+    "beta": beta,     # (radian) góc gripper
+    "xd_q": xd,       # vận tốc x
+    "zd_q": zd,       # vận tốc z
+    "betad": betad    # (rad/s) vận tốc góc gripper
 })
 df_flat.to_csv(flat_out_path, index=False)
-print(f"Saved flat outputs (t, x_q, z_q, beta) -> {flat_out_path}")
+print(f"Saved flat outputs (t, x_q, z_q, beta, xd_q, zd_q, betad) -> {flat_out_path}")
