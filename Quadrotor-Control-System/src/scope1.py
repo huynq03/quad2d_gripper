@@ -220,7 +220,7 @@ def animate(states, controls, target=(5.0,5.0), dt=dt):
         return (frame_line1, tether_line1, trail1, left_line1, right_line1, left_thrust_line1, right_thrust_line1,
                 frame_line2, tether_line2, trail2, left_line2, right_line2, left_thrust_line2, right_thrust_line2)
 
-    ani = FuncAnimation(fig, update, frames=len(states), interval=dt*1000, blit=False)
+    ani = FuncAnimation(fig, update, frames=len(states), interval=dt*1000/5, blit=False)
     plt.show()
 
 
