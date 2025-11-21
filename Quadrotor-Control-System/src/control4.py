@@ -20,13 +20,14 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 import numpy as np
 import pandas as pd
+import os
 
 # ===== Lấy ánh xạ phẳng -> điều khiển đã có sẵn =====
 # File người dùng cung cấp là "tranfer.py"
 import tranfer as tf  # :contentReference[oaicite:4]{index=4}
 
 
-# ---------- Helpers ----------
+# ---------- Helpers ---------- tính đao hàm bằng sai phân hữu hạn mảng y theo t ----------
 def finite_diff(t: np.ndarray, y: np.ndarray, order: int) -> np.ndarray:
     """Central finite-difference of given order."""
     out = y.astype(float).copy()
@@ -193,6 +194,22 @@ class PDFFController:
         cmds   = np.array(cmds)
 
         if save_csv:
+            if not save_csv.lower().endswith('.csv'):
+                # Nếu người dùng chỉ nhập tên thư mục (ví dụ: minsnap_results)
+                folder_path = save_csv
+                
+                # Tạo thư mục nếu chưa có
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+                
+                # Tự động đặt tên file
+                save_csv = os.path.join(folder_path, "ketqua.csv")
+            else:
+                # Nếu người dùng nhập cả tên file (ví dụ: results/log.csv)
+                # Cần đảm bảo thư mục cha tồn tại
+                folder_path = os.path.dirname(save_csv)
+                if folder_path and not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
             log = pd.DataFrame({
                 "t": self.t[:len(cmds)],
                 "u1": cmds[:,0], "u2": cmds[:,1], "u3": cmds[:,2], "tau": cmds[:,3],

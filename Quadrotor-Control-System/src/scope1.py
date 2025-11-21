@@ -102,7 +102,128 @@ def simulate(controller, T=T, dt=dt):
     return np.array(states), np.array(controls)
 
 # ==== Visualization ====
-def animate(states, controls, target=(5.0,5.0), dt=dt):
+# def animate(states, controls, target=(5.0,5.0), dt=dt):
+#     # ======= Tham số hiển thị (không ảnh hưởng dynamics) =======
+#     scale_draw   = 2        # phóng to hình
+#     l_q_vis      = l_q * scale_draw
+#     l_p_vis      = l_p * scale_draw
+#     L_finger     = 0.10 * scale_draw
+#     offset       = 0.05 * scale_draw
+
+#     lw_body      = 5 * scale_draw
+#     lw_pend      = 2 * scale_draw
+#     lw_finger    = 2 * scale_draw
+#     lw_trail     = 1 * scale_draw
+#     lw_thrust    = 2 * scale_draw
+
+#     thrust_scale = 0.04 * scale_draw   # hệ số đổi N -> chiều dài vẽ
+#     thrust_base  = 0.08 * scale_draw   # nhô ra một chút ở chân rotor khi vẽ thanh lực
+
+#     # ======= Dữ liệu trạng thái =======
+#     y, z, phi, theta = states[:,0], states[:,2], states[:,4], states[:,6]
+
+#     # --- TẠO 2 KHUNG HÌNH CON SONG SONG ---
+#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20*scale_draw/2, 10*scale_draw/2), dpi=120)
+#     fig.suptitle('Quadrotor Simulation: Camera Tracking (Left) vs. Full View (Right)') # Tiêu đề chung
+
+#     # Cấu hình ax1 (Camera Tracking)
+#     ax1.set_aspect("equal"); ax1.grid(True, alpha=0.3)
+#     ax1.set_title("Camera Tracking")
+#     ax1.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False)) # Mục tiêu
+    
+#     # Cấu hình ax2 (Full View) - như cũ
+#     ax2.set_xlim(min(y.min(), target[0])-1, max(y.max(), target[0])+1)
+#     ax2.set_ylim(min(z.min(), target[1])-1, max(z.max(), target[1])+1)
+#     ax2.set_aspect("equal"); ax2.grid(True, alpha=0.3)
+#     ax2.set_title("Full View")
+#     ax2.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False)) # Mục tiêu
+
+#     # --- KHAI BÁO CÁC ĐỐI TƯỢNG VẼ CHO ax1 ---
+#     frame_line1,  = ax1.plot([], [], "k",    lw=lw_body)
+#     tether_line1, = ax1.plot([], [], "gray", lw=lw_pend)
+#     trail1,       = ax1.plot([], [], "b-",   lw=lw_trail, alpha=0.6)
+#     left_line1,   = ax1.plot([], [], "r", lw=lw_finger)
+#     right_line1,  = ax1.plot([], [], "r", lw=lw_finger)
+#     left_thrust_line1,  = ax1.plot([], [], color="orange", lw=lw_thrust)
+#     right_thrust_line1, = ax1.plot([], [], color="orange", lw=lw_thrust)
+
+#     # --- KHAI BÁO CÁC ĐỐI TƯỢNG VẼ CHO ax2 ---
+#     frame_line2,  = ax2.plot([], [], "k",    lw=lw_body)
+#     tether_line2, = ax2.plot([], [], "gray", lw=lw_pend)
+#     trail2,       = ax2.plot([], [], "b-",   lw=lw_trail, alpha=0.6)
+#     left_line2,   = ax2.plot([], [], "r", lw=lw_finger)
+#     right_line2,  = ax2.plot([], [], "r", lw=lw_finger)
+#     left_thrust_line2,  = ax2.plot([], [], color="orange", lw=lw_thrust)
+#     right_thrust_line2, = ax2.plot([], [], color="orange", lw=lw_thrust)
+
+#     def rotor_forces(u1, u2, arm):
+#         fR = 0.5 * (u1 + u2 / max(1e-9, arm))
+#         fL = 0.5 * (u1 - u2 / max(1e-9, arm))
+#         return max(0.0, fL), max(0.0, fR)
+
+#     def update(i):
+#         j = i if i < len(controls) else len(controls) - 1
+#         u1c, u2c, _ = controls[j]
+#         fL, fR = rotor_forces(u1c, u2c, l_q)
+
+#         yc, zc, phic, thetac = y[i], z[i], phi[i], theta[i]
+
+#         # --- CẬP NHẬT CHO ax1 (Camera Tracking) ---
+#         view_span = 6.0 # Tổng chiều rộng/cao của khung nhìn
+#         ax1.set_xlim(yc - view_span / 2, yc + view_span / 2)
+#         ax1.set_ylim(zc - view_span / 2, zc + view_span / 2)
+        
+#         c, s = np.cos(phic), np.sin(phic)
+#         R_body = np.array([[ c,  s], [-s,  c]])
+#         T = np.array([[yc, yc], [zc, zc]])
+#         main = np.array([[-l_q_vis,  l_q_vis], [   0.0,       0.0]])
+#         body = R_body @ main + T
+#         frame_line1.set_data(body[0], body[1])
+
+#         ang = phic + thetac
+#         pend_w = np.array([[0.0,                 l_p_vis*np.sin(ang)],
+#                            [0.0,               - l_p_vis*np.cos(ang)]])
+#         pend_w = pend_w + np.array([[yc, yc], [zc, zc]])
+#         tether_line1.set_data(pend_w[0], pend_w[1])
+
+#         end_x, end_y = pend_w[0,1], pend_w[1,1]
+#         vx, vy = np.sin(ang), -np.cos(ang)
+#         nx, ny = -vy, vx
+#         dx, dy = vx * L_finger, vy * L_finger
+#         left_line1.set_data([end_x + nx*offset, end_x + nx*offset + dx],
+#                             [end_y + ny*offset, end_y + ny*offset + dy])
+#         right_line1.set_data([end_x - nx*offset, end_x - nx*offset + dx],
+#                              [end_y - ny*offset, end_y - ny*offset + dy])
+        
+#         left_bar_local  = np.array([[-l_q_vis, -l_q_vis], [ thrust_base, thrust_base + thrust_scale * fL]])
+#         right_bar_local = np.array([[ l_q_vis,  l_q_vis], [ thrust_base, thrust_base + thrust_scale * fR]])
+#         left_bar  = R_body @ left_bar_local  + T
+#         right_bar = R_body @ right_bar_local + T
+#         left_thrust_line1.set_data(left_bar[0],  left_bar[1])
+#         right_thrust_line1.set_data(right_bar[0], right_bar[1])
+        
+#         trail1.set_data(y[:i+1], z[:i+1])
+
+#         # --- CẬP NHẬT CHO ax2 (Full View) ---
+#         # ax2 không cần thay đổi xlim/ylim sau khi khởi tạo
+#         frame_line2.set_data(body[0], body[1]) # Sử dụng cùng body đã tính
+#         tether_line2.set_data(pend_w[0], pend_w[1]) # Sử dụng cùng pend_w đã tính
+#         left_line2.set_data([end_x + nx*offset, end_x + nx*offset + dx],
+#                             [end_y + ny*offset, end_y + ny*offset + dy])
+#         right_line2.set_data([end_x - nx*offset, end_x - nx*offset + dx],
+#                              [end_y - ny*offset, end_y - ny*offset + dy])
+#         left_thrust_line2.set_data(left_bar[0],  left_bar[1])
+#         right_thrust_line2.set_data(right_bar[0], right_bar[1])
+#         trail2.set_data(y[:i+1], z[:i+1])
+
+
+#         return (frame_line1, tether_line1, trail1, left_line1, right_line1, left_thrust_line1, right_thrust_line1,
+#                 frame_line2, tether_line2, trail2, left_line2, right_line2, left_thrust_line2, right_thrust_line2)
+
+#     ani = FuncAnimation(fig, update, frames=len(states), interval=dt*1000/5, blit=False)
+#     plt.show()
+
+def animate(states, controls, target=(5.0, 5.0), dt=dt):
     # ======= Tham số hiển thị (không ảnh hưởng dynamics) =======
     scale_draw   = 2        # phóng to hình
     l_q_vis      = l_q * scale_draw
@@ -120,23 +241,24 @@ def animate(states, controls, target=(5.0,5.0), dt=dt):
     thrust_base  = 0.08 * scale_draw   # nhô ra một chút ở chân rotor khi vẽ thanh lực
 
     # ======= Dữ liệu trạng thái =======
-    y, z, phi, theta = states[:,0], states[:,2], states[:,4], states[:,6]
+    # state = [y, y_dot, z, z_dot, phi, phi_dot, beta, beta_dot]
+    y, z, phi, beta = states[:,0], states[:,2], states[:,4], states[:,6]
 
     # --- TẠO 2 KHUNG HÌNH CON SONG SONG ---
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20*scale_draw/2, 10*scale_draw/2), dpi=120)
-    fig.suptitle('Quadrotor Simulation: Camera Tracking (Left) vs. Full View (Right)') # Tiêu đề chung
+    fig.suptitle('Quadrotor Simulation: Camera Tracking (Left) vs. Full View (Right)')
 
     # Cấu hình ax1 (Camera Tracking)
     ax1.set_aspect("equal"); ax1.grid(True, alpha=0.3)
     ax1.set_title("Camera Tracking")
-    ax1.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False)) # Mục tiêu
+    ax1.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False))  # Mục tiêu
     
-    # Cấu hình ax2 (Full View) - như cũ
+    # Cấu hình ax2 (Full View)
     ax2.set_xlim(min(y.min(), target[0])-1, max(y.max(), target[0])+1)
     ax2.set_ylim(min(z.min(), target[1])-1, max(z.max(), target[1])+1)
     ax2.set_aspect("equal"); ax2.grid(True, alpha=0.3)
     ax2.set_title("Full View")
-    ax2.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False)) # Mục tiêu
+    ax2.add_patch(plt.Circle(target, 0.1*scale_draw, color="g", fill=False))  # Mục tiêu
 
     # --- KHAI BÁO CÁC ĐỐI TƯỢNG VẼ CHO ax1 ---
     frame_line1,  = ax1.plot([], [], "k",    lw=lw_body)
@@ -166,37 +288,55 @@ def animate(states, controls, target=(5.0,5.0), dt=dt):
         u1c, u2c, _ = controls[j]
         fL, fR = rotor_forces(u1c, u2c, l_q)
 
-        yc, zc, phic, thetac = y[i], z[i], phi[i], theta[i]
+        yc, zc, phic, betac = y[i], z[i], phi[i], beta[i]
 
         # --- CẬP NHẬT CHO ax1 (Camera Tracking) ---
-        view_span = 6.0 # Tổng chiều rộng/cao của khung nhìn
+        view_span = 6.0  # Tổng chiều rộng/cao của khung nhìn
         ax1.set_xlim(yc - view_span / 2, yc + view_span / 2)
         ax1.set_ylim(zc - view_span / 2, zc + view_span / 2)
         
+        # Thân quad (body) quay theo phi
         c, s = np.cos(phic), np.sin(phic)
-        R_body = np.array([[ c,  s], [-s,  c]])
-        T = np.array([[yc, yc], [zc, zc]])
-        main = np.array([[-l_q_vis,  l_q_vis], [   0.0,       0.0]])
+        R_body = np.array([[ c,  s],
+                           [-s,  c]])
+        T = np.array([[yc, yc],
+                      [zc, zc]])
+        main = np.array([[-l_q_vis,  l_q_vis],
+                         [   0.0,       0.0]])
         body = R_body @ main + T
         frame_line1.set_data(body[0], body[1])
 
-        ang = phic + thetac
-        pend_w = np.array([[0.0,                 l_p_vis*np.sin(ang)],
-                           [0.0,               - l_p_vis*np.cos(ang)]])
-        pend_w = pend_w + np.array([[yc, yc], [zc, zc]])
+        # === TAY GẮP / GRIPPER THEO BETA (GÓC ABSOLUTE) ===
+        # Theo mô hình: x_g = x_q + L*cos(beta), z_g = z_q - L*sin(beta)
+        ang = betac  # dùng trực tiếp beta, không cộng phi
+
+        pend_w = np.array([
+            [0.0,                   l_p_vis * np.cos(ang)],
+            [0.0,                 - l_p_vis * np.sin(ang)]
+        ]) + np.array([[yc, yc],
+                       [zc, zc]])
+
         tether_line1.set_data(pend_w[0], pend_w[1])
 
-        end_x, end_y = pend_w[0,1], pend_w[1,1]
-        vx, vy = np.sin(ang), -np.cos(ang)
+        # Điểm cuối của tay gắp
+        end_x, end_y = pend_w[0, 1], pend_w[1, 1]
+
+        # Vector dọc theo tay gắp
+        vx, vy = np.cos(ang), -np.sin(ang)
+        # Pháp tuyến sang 2 bên để vẽ 2 "ngón tay"
         nx, ny = -vy, vx
+
         dx, dy = vx * L_finger, vy * L_finger
         left_line1.set_data([end_x + nx*offset, end_x + nx*offset + dx],
                             [end_y + ny*offset, end_y + ny*offset + dy])
         right_line1.set_data([end_x - nx*offset, end_x - nx*offset + dx],
                              [end_y - ny*offset, end_y - ny*offset + dy])
         
-        left_bar_local  = np.array([[-l_q_vis, -l_q_vis], [ thrust_base, thrust_base + thrust_scale * fL]])
-        right_bar_local = np.array([[ l_q_vis,  l_q_vis], [ thrust_base, thrust_base + thrust_scale * fR]])
+        # Lực thrust 2 rotor
+        left_bar_local  = np.array([[-l_q_vis, -l_q_vis],
+                                    [ thrust_base, thrust_base + thrust_scale * fL]])
+        right_bar_local = np.array([[ l_q_vis,  l_q_vis],
+                                    [ thrust_base, thrust_base + thrust_scale * fR]])
         left_bar  = R_body @ left_bar_local  + T
         right_bar = R_body @ right_bar_local + T
         left_thrust_line1.set_data(left_bar[0],  left_bar[1])
@@ -205,9 +345,9 @@ def animate(states, controls, target=(5.0,5.0), dt=dt):
         trail1.set_data(y[:i+1], z[:i+1])
 
         # --- CẬP NHẬT CHO ax2 (Full View) ---
-        # ax2 không cần thay đổi xlim/ylim sau khi khởi tạo
-        frame_line2.set_data(body[0], body[1]) # Sử dụng cùng body đã tính
-        tether_line2.set_data(pend_w[0], pend_w[1]) # Sử dụng cùng pend_w đã tính
+        # xlim/ylim đã cố định từ đầu
+        frame_line2.set_data(body[0], body[1])
+        tether_line2.set_data(pend_w[0], pend_w[1])
         left_line2.set_data([end_x + nx*offset, end_x + nx*offset + dx],
                             [end_y + ny*offset, end_y + ny*offset + dy])
         right_line2.set_data([end_x - nx*offset, end_x - nx*offset + dx],
@@ -216,14 +356,13 @@ def animate(states, controls, target=(5.0,5.0), dt=dt):
         right_thrust_line2.set_data(right_bar[0], right_bar[1])
         trail2.set_data(y[:i+1], z[:i+1])
 
+        return (frame_line1, tether_line1, trail1, left_line1, right_line1,
+                left_thrust_line1, right_thrust_line1,
+                frame_line2, tether_line2, trail2, left_line2, right_line2,
+                left_thrust_line2, right_thrust_line2)
 
-        return (frame_line1, tether_line1, trail1, left_line1, right_line1, left_thrust_line1, right_thrust_line1,
-                frame_line2, tether_line2, trail2, left_line2, right_line2, left_thrust_line2, right_thrust_line2)
-
-    ani = FuncAnimation(fig, update, frames=len(states), interval=dt*1000/5, blit=False)
+    ani = FuncAnimation(fig, update, frames=len(states), interval=dt*1000, blit=False)
     plt.show()
-
-
 # ==== Main ====
 def main():
     controller = CascadePIDActuatedPendulum(target=(5.0, 5.0))
